@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Fortune</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0a0a0a; padding:40px; text-align:center; color:white; }
+
+    :root {
+      --neon-pink: #ff4dfc;
+      --neon-blue: #4dffff;
+    }
+
+    #box {
+      background: rgba(15, 15, 15, 0.9);
+      padding:30px;
+      max-width:400px;
+      margin:auto;
+      border-radius:10px;
+      border: 2px solid var(--neon-blue);
+      box-shadow:
+        0 0 20px var(--neon-blue),
+        0 0 40px var(--neon-pink),
+        inset 0 0 20px var(--neon-blue);
+    }
+
+    h2 {
+      background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px var(--neon-pink), 0 0 10px var(--neon-blue);
+    }
+
+    input {
+      padding:10px;
+      width:80%;
+      margin:10px 0;
+      border:1px solid var(--neon-pink);
+      border-radius:6px;
+      background:#111;
+      color:var(--neon-blue);
+      box-shadow:0 0 10px var(--neon-pink), 0 0 10px var(--neon-blue);
+    }
+
+    button {
+      padding:10px 20px;
+      cursor:pointer;
+      background:#111;
+      color:var(--neon-blue);
+      border:1px solid var(--neon-pink);
+      border-radius:6px;
+      box-shadow:0 0 15px var(--neon-blue), 0 0 15px var(--neon-pink);
+      transition:0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+      color:black;
+      box-shadow:0 0 25px var(--neon-pink), 0 0 25px var(--neon-blue);
+    }
+
+    #historyBox {
+      background: rgba(20, 20, 20, 0.9);
+      padding:20px;
+      max-width:400px;
+      margin:20px auto;
+      border-radius:10px;
+      box-shadow:0 0 20px rgba(255,200,255,0.4);
+      display:none;
+    }
+
+    #historyList li {
+      text-align:left;
+      margin:6px 0;
+      color:#dcdcff;
+    }
+      #result {
+      margin-top:25px;
+      margin-bottom:20px;
+      display:block;
+    }
+  </style>
+</head>
+<body>
+  <div id="box">
+    <h2>Daily Fortune</h2>
+    <p>Enter your birthday to see today's fortune.</p>
+
+    <input type="text" id="birthday" placeholder="YYYY-MM-DD" />
+    <br />
+    <button onclick="showFortune()">Check Fortune</button>
+
+    <div id="result"></div>
+  </div>
+
+  <div id="historyBox">
+    <h3 style="color:var(--neon-pink);">History</h3>
+    <ul id="historyList"></ul>
+  </div>
+
+  <script>
+    let history = JSON.parse(localStorage.getItem('fortuneHistory') || '[]');
+
+    const fortunes = [
+      "Today will bring you calm energy and good focus.",
+      "A small surprise will brighten your day.",
+      "You may face a challenge, but you will overcome it.",
+      "Someone will appreciate your kindness today.",
+      "A lucky opportunity may appear—stay alert!",
+      "Your hard work will pay off today.",
+      "A peaceful and relaxing day is ahead." 
+    ];
+
+    function showFortune() {
+      const birthday = document.getElementById("birthday").value;
+      const result = document.getElementById("result");
+
+      if (!birthday) {
+        result.textContent = "Please enter your birthday first.";
+        return;
+      }
+
+      const today = new Date().toDateString();
+      const seed = birthday + today;
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        hash = (hash * 31 + seed.charCodeAt(i)) % fortunes.length;
+      }
+
+      const fortune = fortunes[hash];
+      result.textContent = fortune;
+
+      const record = { birthday, date: today, fortune };
+      history.push(record);
+      if (history.length > 10) history.shift();
+      localStorage.setItem('fortuneHistory', JSON.stringify(history));
+
+      displayHistory();
+    }
+
+    function displayHistory() {
+      const box = document.getElementById('historyBox');
+      const list = document.getElementById('historyList');
+
+      if (history.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      box.style.display = 'block';
+      list.innerHTML = history
+        .map(r => `<li>${r.date}: ${r.fortune}</li>`)
+        .join('');
+    }
+
+    window.onload = displayHistory;
+  </script>
+</body>
+</html>
